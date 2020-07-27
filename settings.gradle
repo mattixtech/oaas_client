@@ -1,0 +1,4 @@
+rootProject.name = 'oaas_client'
+
+
+enableFeaturePreview('GRADLE_METADATA')
