@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackOutput.Target.COMMONJS
+
 plugins {
     kotlin("multiplatform") version "1.3.72"
     id("maven-publish")
@@ -19,11 +21,26 @@ val coroutinesVersion = "1.3.2"
 kotlin {
     jvm()
     js {
-        browser {
+        configure(setOf(compilations["main"], compilations["test"])) {
+            compileKotlinTask.kotlinOptions {
+                sourceMapEmbedSources = "always"
+                sourceMap = true
+                moduleKind = "commonjs"
+            }
+        }
+        nodejs {
             testTask {
                 useMocha()
             }
         }
+//        browser {
+////            webpackTask {
+////                output.libraryTarget = COMMONJS
+////            }
+//            testTask {
+//                useMocha()
+//            }
+//        }
     }
 
     sourceSets {
@@ -52,7 +69,6 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                // TODO: Switch this to 'test-junit5' but there is an issue with finding the tests
                 implementation(kotlin("test-junit"))
                 implementation("org.hamcrest:hamcrest-library:2.1")
             }

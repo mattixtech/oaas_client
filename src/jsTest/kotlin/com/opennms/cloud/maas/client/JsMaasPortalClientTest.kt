@@ -4,7 +4,8 @@ import com.opennms.cloud.maas.client.auth.TokenAuthenticationMethod
 import kotlin.js.Promise
 import kotlin.test.Test
 
-private val token = "TODO"
+// To access environment variables in NodeJS
+external val process: dynamic
 
 class JsMaasPortalClientTest {
 
@@ -13,9 +14,9 @@ class JsMaasPortalClientTest {
         val client = MaasPortalClientBuilder()
                 .withOrganization("matt")
                 .withEnvironment(Environment.DEV)
-                .withAuthenticationMethod(TokenAuthenticationMethod(token))
+                .withAuthenticationMethod(TokenAuthenticationMethod(process.env.BEARER_TOKEN.unsafeCast<String>()))
                 .build()
-        return client.getInstances().apply { then { println(it) } }
+        return client.getOnmsInstances().apply { then { println(it) } }
     }
 
 }

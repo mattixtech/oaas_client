@@ -17,7 +17,7 @@ class CoroutineMaasPortalClient(
     private val client = HttpClient()
     private val provideBearer: HttpRequestBuilder.() -> Unit = { header("authorization", authToken) }
 
-    suspend fun getInstances(): String = get(urlForOrgEndpoint("onms-instance"))
+    suspend fun getOnmsInstances(): String = get(urlForOrgEndpoint("onms-instance"))
 
     private fun urlForOrgEndpoint(endpoint: String) = "$baseUrl/$organization/$endpoint"
 

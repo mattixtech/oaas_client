@@ -5,7 +5,7 @@ import kotlinx.coroutines.future.future
 
 class JvmMaasPortalClient(private val client: CoroutineMaasPortalClient) {
 
-    fun getInstances() = GlobalScope.future { client.getInstances() }
+    fun getOnmsinstances() = GlobalScope.future { client.getOnmsInstances() }
 
 }
 

@@ -5,6 +5,6 @@ import kotlinx.coroutines.promise
 
 class JsMaasPortalClient(private val client: CoroutineMaasPortalClient) {
 
-    fun getInstances() = GlobalScope.promise { client.getInstances() }
+    fun getOnmsInstances() = GlobalScope.promise { client.getOnmsInstances() }
 
 }
