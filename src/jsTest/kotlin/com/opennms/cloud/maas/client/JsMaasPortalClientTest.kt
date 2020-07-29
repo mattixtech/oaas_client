@@ -1,6 +1,8 @@
 package com.opennms.cloud.maas.client
 
 import com.opennms.cloud.maas.client.auth.TokenAuthenticationMethod
+import com.opennms.cloud.maas.client.model.OnmsInstance
+import com.opennms.cloud.maas.client.model.PaginatedResponse
 import kotlin.js.Promise
 import kotlin.test.Test
 
@@ -10,7 +12,7 @@ external val process: dynamic
 class JsMaasPortalClientTest {
 
     @Test
-    fun canGetInstances(): Promise<String> {
+    fun canGetInstances(): Promise<PaginatedResponse<OnmsInstance>> {
         val client = MaasPortalClientBuilder()
                 .withOrganization("matt")
                 .withEnvironment(Environment.DEV)
