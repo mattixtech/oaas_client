@@ -11,10 +11,10 @@ import kotlinx.serialization.json.JsonConfiguration
 import java.util.concurrent.CompletableFuture
 
 @OptIn(UnstableDefault::class)
-actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
+internal actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
 
 actual typealias AsyncResult<T> = CompletableFuture<T>
 
-actual fun <T> Deferred<T>.toAsyncResult() = asCompletableFuture()
+internal actual fun <T> Deferred<T>.toAsyncResult() = asCompletableFuture()
 
-actual fun coroutineDispatcher() = Dispatchers.IO
+internal actual fun coroutineDispatcher() = Dispatchers.IO

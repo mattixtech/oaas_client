@@ -24,7 +24,7 @@ import kotlin.jvm.JvmOverloads
 /**
  * Allow platform specific serialization engines to be provided.
  */
-expect fun serializer(): JsonSerializer
+internal expect fun serializer(): JsonSerializer
 
 @OptIn(UnstableDefault::class)
 private val jsonSerdes by lazy { Json(JsonConfiguration.Default) }
@@ -34,12 +34,12 @@ expect class AsyncResult<T>
 /**
  * Wrap the result of an asynchronous coroutine execution in a platform specific result type.
  */
-expect fun <T> Deferred<T>.toAsyncResult(): AsyncResult<T>
+internal expect fun <T> Deferred<T>.toAsyncResult(): AsyncResult<T>
 
 /**
  * Delegate to a platform specific coroutine dispatcher so we can take advantage of the IO thread pool on JVM.
  */
-expect fun coroutineDispatcher(): CoroutineDispatcher
+internal expect fun coroutineDispatcher(): CoroutineDispatcher
 
 // HTTP consts
 private const val AUTHORIZATION_HEADER = "authorization"

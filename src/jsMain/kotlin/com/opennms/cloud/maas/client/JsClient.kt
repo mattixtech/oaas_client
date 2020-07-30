@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonConfiguration
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(UnstableDefault::class)
-actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
+internal actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
 
 actual typealias AsyncResult<T> = com.opennms.cloud.maas.client.Promise<T>
 
@@ -22,6 +22,6 @@ actual typealias AsyncResult<T> = com.opennms.cloud.maas.client.Promise<T>
 // dynamic and has to be cast first before it can be treated as a promise.
 class Promise<T>(executor: (resolve: (T) -> Unit, reject: (Throwable) -> Unit) -> Unit) : kotlin.js.Promise<T>(executor)
 
-actual fun <T> Deferred<T>.toAsyncResult() = asPromise().asDynamic()
+internal actual fun <T> Deferred<T>.toAsyncResult() = asPromise().asDynamic()
 
-actual fun coroutineDispatcher() = Dispatchers.Default
+internal actual fun coroutineDispatcher() = Dispatchers.Default
