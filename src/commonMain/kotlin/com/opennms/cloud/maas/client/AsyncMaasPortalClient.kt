@@ -5,10 +5,7 @@ import com.opennms.cloud.maas.client.model.*
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.JsonSerializer
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.post
+import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.Deferred
@@ -65,7 +62,6 @@ class AsyncMaasPortalClient(
         @JvmName("read")
         get
 
-
     @JsName("update")
     val update = Update()
         @JvmName("update")
@@ -80,21 +76,29 @@ class AsyncMaasPortalClient(
 
     inner class Create {
 
-        fun onmsInstance(onmsInstance: OnmsInstanceRequestEntity) = doAsync { createFromJson(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), onmsInstance) }
+        @JsName("onmsInstance")
+        fun onmsInstance(onmsInstance: OnmsInstanceRequestEntity) = doAsync { createFromEntity(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), onmsInstance) }
 
     }
 
     inner class Read {
 
         @JsName("onmsInstances")
-        fun onmsInstances() = doAsync { getPaginatedJson<OnmsInstanceResponseEntity>(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT)) }
+        fun onmsInstances() = doAsync { getPaginatedJson<OnmsInstanceEntity>(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT)) }
 
     }
 
     inner class Update {
+
+        @JsName("onmsInstance")
+        fun onmsInstance(id: String, entity: OnmsInstanceEntity) = doAsync { updateById(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), id, entity) }
+
     }
 
     inner class Delete {
+
+        @JsName("onmsInstance")
+        fun onmsInstance(id: String) = doAsync { deleteById(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), id) }
 
     }
 
@@ -113,8 +117,20 @@ class AsyncMaasPortalClient(
                 PaginatedResponse(totalRecords = totalRecords, records = pagedRecords)
             }
 
-    private suspend fun <T : RequestEntity> createFromJson(url: String, entity: T): String =
+    private suspend fun <T : RequestEntity> createFromEntity(url: String, entity: T): String =
             client.post(url) {
+                requestAuthProvider()
+                contentType(ContentType.Application.Json)
+                body = entity
+            }
+
+    private suspend fun deleteById(url: String, id: String) =
+            client.delete<Unit>("$url/$id") {
+                requestAuthProvider()
+            }
+
+    private suspend fun updateById(url: String, id: String, entity: Entity) =
+            client.put<Unit>("$url/$id") {
                 requestAuthProvider()
                 contentType(ContentType.Application.Json)
                 body = entity

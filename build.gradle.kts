@@ -71,7 +71,7 @@ kotlin {
         // JVM
         val jvmMain by getting {
             dependencies {
-                implementation(kotlin("stdlib-jdk8"))
+                api(kotlin("stdlib-jdk8"))
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-serialization-jvm:$ktorVersion")
@@ -88,7 +88,7 @@ kotlin {
         // JavaScript
         val jsMain by getting {
             dependencies {
-                implementation(kotlin("stdlib-js"))
+                api(kotlin("stdlib-js"))
                 implementation("io.ktor:ktor-client-js:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-serialization-js:$ktorVersion")

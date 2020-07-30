@@ -32,18 +32,49 @@ import com.opennms.cloud.maas.client.AsyncMaasPortalClient;
 import com.opennms.cloud.maas.client.Environment;
 import com.opennms.cloud.maas.client.MaasPortalClientBuilder;
 import com.opennms.cloud.maas.client.auth.TokenAuthenticationMethod;
+import com.opennms.cloud.maas.client.model.OnmsInstanceEntity;
+import com.opennms.cloud.maas.client.model.OnmsInstanceRequestEntity;
 
 public class Demo {
 
+    private static AsyncMaasPortalClient client = null;
+    private static final String ORGANIZATION_NAME = "matt";
+
     public static void main(String[] args) {
-        AsyncMaasPortalClient client = new MaasPortalClientBuilder()
+        client = new MaasPortalClientBuilder()
                 .withAuthenticationMethod(new TokenAuthenticationMethod(System.getenv("BEARER_TOKEN")))
                 .withEnvironment(Environment.DEV)
-                .withOrganization("matt")
+                .withOrganization(ORGANIZATION_NAME)
                 .build();
 
-        System.out.println(client.read().onmsInstances().join());
+        String createdInstanceId = createInstance();
+        listInstances();
 
+        updateInstance(createdInstanceId);
+        listInstances();
+
+        deleteInstance(createdInstanceId);
+        listInstances();
+    }
+
+    private static String createInstance() {
+        return client.create().onmsInstance(new OnmsInstanceRequestEntity("devjam")).join();
+    }
+
+    private static void updateInstance(String instanceId) {
+        client.update().onmsInstance(instanceId, new OnmsInstanceEntity.Builder()
+                .withId(instanceId)
+                .withName("kiwi")
+                .withOrganization(ORGANIZATION_NAME)
+                .build()).join();
+    }
+
+    private static void deleteInstance(String instanceId) {
+        client.delete().onmsInstance(instanceId).join();
+    }
+
+    private static void listInstances() {
+        client.read().onmsInstances().thenAccept(res -> System.out.println(res.getPagedRecords())).join();
     }
 
 }
