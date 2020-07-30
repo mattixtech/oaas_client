@@ -3,10 +3,12 @@ package com.opennms.cloud.maas.client
 import io.ktor.client.features.json.JsonSerializer
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asPromise
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(UnstableDefault::class)
 actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
@@ -21,3 +23,5 @@ actual typealias AsyncResult<T> = com.opennms.cloud.maas.client.Promise<T>
 class Promise<T>(executor: (resolve: (T) -> Unit, reject: (Throwable) -> Unit) -> Unit) : kotlin.js.Promise<T>(executor)
 
 actual fun <T> Deferred<T>.toAsyncResult() = asPromise().asDynamic()
+
+actual fun coroutineDispatcher() = Dispatchers.Default

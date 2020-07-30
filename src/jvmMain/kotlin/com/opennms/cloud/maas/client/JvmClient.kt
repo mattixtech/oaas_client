@@ -3,6 +3,7 @@ package com.opennms.cloud.maas.client
 import io.ktor.client.features.json.JsonSerializer
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
@@ -15,3 +16,5 @@ actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfigurati
 actual typealias AsyncResult<T> = CompletableFuture<T>
 
 actual fun <T> Deferred<T>.toAsyncResult() = asCompletableFuture()
+
+actual fun coroutineDispatcher() = Dispatchers.IO

@@ -32,6 +32,7 @@ import com.opennms.cloud.maas.client.AsyncMaasPortalClient;
 import com.opennms.cloud.maas.client.Environment;
 import com.opennms.cloud.maas.client.MaasPortalClientBuilder;
 import com.opennms.cloud.maas.client.auth.TokenAuthenticationMethod;
+import com.opennms.cloud.maas.client.model.ListQueryOptions;
 import com.opennms.cloud.maas.client.model.OnmsInstanceEntity;
 import com.opennms.cloud.maas.client.model.OnmsInstanceRequestEntity;
 
@@ -49,15 +50,15 @@ public class Demo {
 
         // Create an instance with name 'devjam'
         String createdInstanceId = createInstance();
-        listInstances();
+        listInstances("devjam");
 
         // Update the existing instance's name to 'kiwi'
         updateInstance(createdInstanceId);
-        listInstances();
+        listInstances("kiwi");
 
         // Delete the instance we created
         deleteInstance(createdInstanceId);
-        listInstances();
+        listInstances("kiwi");
     }
 
     private static String createInstance() {
@@ -76,8 +77,12 @@ public class Demo {
         client.delete().onmsInstance(instanceId).join();
     }
 
-    private static void listInstances() {
-        client.read().onmsInstances().thenAccept(res -> System.out.println(res.getPagedRecords())).join();
+    private static void listInstances(String prefix) {
+        ListQueryOptions options = new ListQueryOptions.Builder()
+                .withSearchField("name")
+                .withSearchPrefix(prefix)
+                .build();
+        client.read().onmsInstances(options).thenAccept(res -> System.out.println(res.getPagedRecords())).join();
     }
 
 }

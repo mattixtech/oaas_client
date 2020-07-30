@@ -8,8 +8,9 @@ import io.ktor.client.features.json.JsonSerializer
 import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
@@ -18,7 +19,11 @@ import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonElement
 import kotlin.js.JsName
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 
+/**
+ * Allow platform specific serialization engines to be provided.
+ */
 expect fun serializer(): JsonSerializer
 
 @OptIn(UnstableDefault::class)
@@ -26,19 +31,38 @@ private val jsonSerdes by lazy { Json(JsonConfiguration.Default) }
 
 expect class AsyncResult<T>
 
+/**
+ * Wrap the result of an asynchronous coroutine execution in a platform specific result type.
+ */
 expect fun <T> Deferred<T>.toAsyncResult(): AsyncResult<T>
 
+/**
+ * Delegate to a platform specific coroutine dispatcher so we can take advantage of the IO thread pool on JVM.
+ */
+expect fun coroutineDispatcher(): CoroutineDispatcher
+
+// HTTP consts
 private const val AUTHORIZATION_HEADER = "authorization"
 
+// URL consts
 private const val API_SUFFIX = "api/v1/portal"
 
+// Endpoint consts
 private const val ONMS_INSTANCE_ENDPOINT = "onms-instance"
+
+// Search/Sort/Filter/Paginate consts
+private const val ORDER_BY_KEY = "orderBy"
+private const val LIMIT_KEY = "limit"
+private const val OFFSET_KEY = "offset"
+private const val SORT_KEY = "sort"
+private const val SEARCH_KEY = "search"
+private const val SEARCH_COLUMN_KEY = "searchColumn"
 
 class AsyncMaasPortalClient(
         environment: Environment,
         private val authenticationMethod: AuthenticationMethod,
         private val organization: String
-) {
+) : CoroutineScope by CoroutineScope(coroutineDispatcher()) {
 
     private val baseUrl = "${environment.baseUrl}/$API_SUFFIX"
     private val authToken by lazy { authenticationMethod.authenticationToken }
@@ -72,8 +96,6 @@ class AsyncMaasPortalClient(
         @JvmName("delete")
         get
 
-    private fun <T> doAsync(block: suspend () -> T) = GlobalScope.async { block() }.toAsyncResult()
-
     inner class Create {
 
         @JsName("onmsInstance")
@@ -84,7 +106,11 @@ class AsyncMaasPortalClient(
     inner class Read {
 
         @JsName("onmsInstances")
-        fun onmsInstances() = doAsync { getPaginatedJson<OnmsInstanceEntity>(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT)) }
+        @JvmOverloads
+        fun onmsInstances(options: ListQueryOptions? = null) = doAsync { getPaginated<OnmsInstanceEntity>(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), options) }
+
+        @JsName("onmsInstance")
+        fun onmsInstance(id: String) = doAsync { get<OnmsInstanceEntity>(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), id) }
 
     }
 
@@ -102,19 +128,40 @@ class AsyncMaasPortalClient(
 
     }
 
+    /**
+     * Execute the request in a coroutine and wrap it in a platform specific result (Promise on JS/Future on JVM).
+     */
+    private fun <T> doAsync(block: suspend () -> T) = async { block() }.toAsyncResult()
+
     private fun urlForOrgEndpoint(endpoint: String) = "$baseUrl/$organization/$endpoint"
 
     @OptIn(ImplicitReflectionSerializer::class)
-    private suspend inline fun <reified T : Any> getPaginatedJson(url: String): PaginatedResponse<T> =
-            client.get<Map<String, JsonElement>>(url, requestAuthProvider).let { jsonMap ->
-                val totalRecords = requireNotNull(jsonMap[TOTAL_RECORDS_KEY])
-                        .primitive
-                        .int
-                val pagedRecords = requireNotNull(jsonMap[PAGED_RECORDS_KEY])
-                        .jsonArray
-                        .map { jsonSerdes.fromJson(it) as T }
+    private suspend inline fun <reified T : Entity> getPaginated(url: String, options: ListQueryOptions?): PaginatedResponse<T> =
+            client.get<Map<String, JsonElement>>(url) {
+                requestAuthProvider()
+                if (options != null) {
+                    if (options.orderByColumn != null) parameter(ORDER_BY_KEY, options.orderByColumn)
+                    if (options.limit != null) parameter(LIMIT_KEY, options.limit)
+                    if (options.offset != null) parameter(OFFSET_KEY, options.offset)
+                    if (options.sortOrder != null) parameter(SORT_KEY, options.sortOrder)
+                    if (options.searchPrefix != null) parameter(SEARCH_KEY, options.searchPrefix)
+                    if (options.searchField != null) parameter(SEARCH_COLUMN_KEY, options.searchField)
+                }
+            }
+                    .let { jsonMap ->
+                        val totalRecords = requireNotNull(jsonMap[TOTAL_RECORDS_KEY])
+                                .primitive
+                                .int
+                        val pagedRecords = requireNotNull(jsonMap[PAGED_RECORDS_KEY])
+                                .jsonArray
+                                .map { jsonSerdes.fromJson(it) as T }
 
-                PaginatedResponse(totalRecords = totalRecords, records = pagedRecords)
+                        PaginatedResponse(totalRecords = totalRecords, records = pagedRecords)
+                    }
+
+    private suspend inline fun <reified T : Entity> get(url: String, id: String): T =
+            client.get<T>("$url/$id") {
+                requestAuthProvider()
             }
 
     private suspend fun <T : RequestEntity> createFromEntity(url: String, entity: T): String =

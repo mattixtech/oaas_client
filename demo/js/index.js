@@ -17,8 +17,12 @@ const mpc = require('oaas_client/packages/oaas_client/kotlin/oaas_client').com.o
         return asyncClient.create.onmsInstance(instance);
     }
 
-    async function listInstances() {
-        return asyncClient.read.onmsInstances();
+    async function listInstances(prefix) {
+        const options = new mpc.model.ListQueryOptions.Builder()
+            .withSearchField("name")
+            .withSearchPrefix(prefix)
+            .build();
+        return asyncClient.read.onmsInstances(options);
     }
 
     async function updateInstance(id, updatedEntity) {
@@ -29,15 +33,20 @@ const mpc = require('oaas_client/packages/oaas_client/kotlin/oaas_client').com.o
         return asyncClient.delete.onmsInstance(id);
     }
 
-    async function printInstances() {
-        const result = await listInstances();
+    async function printInstances(prefix) {
+        const result = await listInstances(prefix);
         console.log(result.pagedRecords)
     }
+
+    // Test getting a specific instance
+    // asyncClient.read.onmsInstance("5f7481e2-6dfe-4aa4-b7ae-6303e3fd4620").then((res) => {
+    //     console.log(res);
+    // });
 
     // Create an instance with name 'devjam'
     const instanceCreatedId = await createInstance(new mpc.model.OnmsInstanceRequestEntity("devjam"));
 
-    await printInstances();
+    await printInstances("devjam");
 
     // Update the existing instance's name to 'kiwi'
     const updatedInstance = new mpc.model.OnmsInstanceEntity.Builder()
@@ -47,12 +56,12 @@ const mpc = require('oaas_client/packages/oaas_client/kotlin/oaas_client').com.o
         .build();
     await updateInstance(instanceCreatedId, updatedInstance);
 
-    await printInstances();
+    await printInstances("kiwi");
 
     // Delete the instance we created
     await deleteInstance(instanceCreatedId);
 
-    await printInstances()
+    await printInstances("kiwi")
 
 
 })();
