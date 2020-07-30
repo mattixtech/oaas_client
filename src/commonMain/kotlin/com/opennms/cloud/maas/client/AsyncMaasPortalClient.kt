@@ -62,7 +62,7 @@ class AsyncMaasPortalClient(
         environment: Environment,
         private val authenticationMethod: AuthenticationMethod,
         private val organization: String
-) : CoroutineScope by CoroutineScope(coroutineDispatcher()) {
+) {
 
     private val baseUrl = "${environment.baseUrl}/$API_SUFFIX"
     private val authToken by lazy { authenticationMethod.authenticationToken }
@@ -72,6 +72,7 @@ class AsyncMaasPortalClient(
         }
     }
     private val requestAuthProvider: HttpRequestBuilder.() -> Unit = { header(AUTHORIZATION_HEADER, authToken) }
+    private val coroutineScope = CoroutineScope(coroutineDispatcher())
 
     /**
      * The following properties exist to scope the ReST requests to their respective CRUD operation.
@@ -131,7 +132,7 @@ class AsyncMaasPortalClient(
     /**
      * Execute the request in a coroutine and wrap it in a platform specific result (Promise on JS/Future on JVM).
      */
-    private fun <T> doAsync(block: suspend () -> T) = async { block() }.toAsyncResult()
+    private fun <T> doAsync(block: suspend () -> T) = coroutineScope.async { block() }.toAsyncResult()
 
     private fun urlForOrgEndpoint(endpoint: String) = "$baseUrl/$organization/$endpoint"
 
