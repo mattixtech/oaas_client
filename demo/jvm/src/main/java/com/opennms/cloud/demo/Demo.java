@@ -47,12 +47,15 @@ public class Demo {
                 .withOrganization(ORGANIZATION_NAME)
                 .build();
 
+        // Create an instance with name 'devjam'
         String createdInstanceId = createInstance();
         listInstances();
 
+        // Update the existing instance's name to 'kiwi'
         updateInstance(createdInstanceId);
         listInstances();
 
+        // Delete the instance we created
         deleteInstance(createdInstanceId);
         listInstances();
     }
