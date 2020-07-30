@@ -28,23 +28,22 @@
 
 package com.opennms.cloud.demo;
 
-import java.util.concurrent.ExecutionException;
-
+import com.opennms.cloud.maas.client.AsyncMaasPortalClient;
 import com.opennms.cloud.maas.client.Environment;
-import com.opennms.cloud.maas.client.JvmMaasPortalClient;
 import com.opennms.cloud.maas.client.MaasPortalClientBuilder;
 import com.opennms.cloud.maas.client.auth.TokenAuthenticationMethod;
 
 public class Demo {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        JvmMaasPortalClient client = new MaasPortalClientBuilder()
+    public static void main(String[] args) {
+        AsyncMaasPortalClient client = new MaasPortalClientBuilder()
                 .withAuthenticationMethod(new TokenAuthenticationMethod(System.getenv("BEARER_TOKEN")))
                 .withEnvironment(Environment.DEV)
                 .withOrganization("matt")
                 .build();
-        
-        System.out.println(client.getOnmsinstances().get());
+
+        System.out.println(client.read().onmsInstances().join());
+
     }
 
 }

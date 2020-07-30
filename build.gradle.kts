@@ -95,6 +95,8 @@ kotlin {
                 // TODO: looks like this isn't needed
 //                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion")
 
+                implementation(npm("uuid"))
+                
                 // Note these are included as a workaround for missing JS dependencies in KTOR, known bug see:
                 // https://youtrack.jetbrains.com/issue/KT-30619, https://github.com/ktorio/ktor/issues/1822
                 implementation(npm("text-encoding"))

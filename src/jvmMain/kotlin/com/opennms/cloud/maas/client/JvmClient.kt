@@ -2,15 +2,16 @@ package com.opennms.cloud.maas.client
 
 import io.ktor.client.features.json.JsonSerializer
 import io.ktor.client.features.json.serializer.KotlinxSerializer
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.promise
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.future.asCompletableFuture
+import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import java.util.concurrent.CompletableFuture
 
+@OptIn(UnstableDefault::class)
 actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
 
-class JsMaasPortalClient(private val client: CoroutineMaasPortalClient) {
+actual typealias AsyncResult<T> = CompletableFuture<T>
 
-    fun getOnmsInstances() = GlobalScope.promise { client.getOnmsInstances() }
-
-}
+actual fun <T> Deferred<T>.toAsyncResult() = asCompletableFuture()
