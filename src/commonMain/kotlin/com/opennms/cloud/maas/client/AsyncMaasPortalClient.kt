@@ -12,8 +12,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonElement
@@ -26,7 +24,6 @@ import kotlin.jvm.JvmOverloads
  */
 internal expect fun serializer(): JsonSerializer
 
-@OptIn(UnstableDefault::class)
 private val jsonSerdes by lazy { Json(JsonConfiguration.Default) }
 
 expect class AsyncResult<T>
@@ -136,7 +133,6 @@ class AsyncMaasPortalClient(
 
     private fun urlForOrgEndpoint(endpoint: String) = "$baseUrl/$organization/$endpoint"
 
-    @OptIn(ImplicitReflectionSerializer::class)
     private suspend inline fun <reified T : Entity> getPaginated(url: String, options: ListQueryOptions?): PaginatedResponse<T> =
             client.get<Map<String, JsonElement>>(url) {
                 requestAuthProvider()

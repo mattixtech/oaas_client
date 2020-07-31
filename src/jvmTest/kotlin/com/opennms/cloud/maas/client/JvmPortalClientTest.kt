@@ -1,8 +1,8 @@
 package com.opennms.cloud.maas.client
 
 import com.opennms.cloud.maas.client.auth.TokenAuthenticationMethod
-import org.junit.Ignore
-import org.junit.Test
+import kotlin.test.Ignore
+import kotlin.test.Test
 
 class JvmPortalClientTest {
 
