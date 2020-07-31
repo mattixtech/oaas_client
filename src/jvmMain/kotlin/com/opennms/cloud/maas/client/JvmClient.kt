@@ -9,7 +9,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import java.util.concurrent.CompletableFuture
 
-internal actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
+internal actual val jsonSerdes = Json(JsonConfiguration.Stable)
+internal actual val ktorSerializer: JsonSerializer = KotlinxSerializer(jsonSerdes)
 
 actual typealias AsyncResult<T> = CompletableFuture<T>
 

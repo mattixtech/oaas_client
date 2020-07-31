@@ -12,8 +12,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonElement
 import kotlin.js.JsName
 import kotlin.jvm.JvmName
@@ -22,10 +22,12 @@ import kotlin.jvm.JvmOverloads
 /**
  * Allow platform specific serialization engines to be provided.
  */
-internal expect fun serializer(): JsonSerializer
+internal expect val jsonSerdes: Json
+internal expect val ktorSerializer: JsonSerializer
 
-private val jsonSerdes by lazy { Json(JsonConfiguration.Default) }
-
+/**
+ * Platform specific async result type.
+ */
 expect class AsyncResult<T>
 
 /**
@@ -65,7 +67,7 @@ class AsyncMaasPortalClient(
     private val authToken by lazy { authenticationMethod.authenticationToken }
     private val client = HttpClient {
         install(JsonFeature) {
-            serializer = serializer()
+            serializer = ktorSerializer
         }
     }
     private val requestAuthProvider: HttpRequestBuilder.() -> Unit = { header(AUTHORIZATION_HEADER, authToken) }
@@ -105,7 +107,7 @@ class AsyncMaasPortalClient(
 
         @JsName("onmsInstances")
         @JvmOverloads
-        fun onmsInstances(options: ListQueryOptions? = null) = doAsync { getPaginated<OnmsInstanceEntity>(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), options) }
+        fun onmsInstances(options: ListQueryOptions? = null) = doAsync { getPaginated(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), OnmsInstanceEntity.serializer(), options) }
 
         @JsName("onmsInstance")
         fun onmsInstance(id: String) = doAsync { get<OnmsInstanceEntity>(urlForOrgEndpoint(ONMS_INSTANCE_ENDPOINT), id) }
@@ -133,7 +135,7 @@ class AsyncMaasPortalClient(
 
     private fun urlForOrgEndpoint(endpoint: String) = "$baseUrl/$organization/$endpoint"
 
-    private suspend inline fun <reified T : Entity> getPaginated(url: String, options: ListQueryOptions?): PaginatedResponse<T> =
+    private suspend fun <T : Entity> getPaginated(url: String, serializer: DeserializationStrategy<T>, options: ListQueryOptions?): PaginatedResponse<T> =
             client.get<Map<String, JsonElement>>(url) {
                 requestAuthProvider()
                 if (options != null) {
@@ -155,7 +157,7 @@ class AsyncMaasPortalClient(
                                 .int
                         val pagedRecords = requireNotNull(jsonMap[PAGED_RECORDS_KEY])
                                 .jsonArray
-                                .map { jsonSerdes.fromJson(it) as T }
+                                .map { jsonSerdes.fromJson(serializer, it) }
 
                         PaginatedResponse(totalRecords = totalRecords, records = pagedRecords)
                     }

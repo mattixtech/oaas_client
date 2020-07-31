@@ -18,22 +18,6 @@ repositories {
 version = "0.0.1-SNAPSHOT"
 group = "com.opennms.cloud"
 
-// kotlinx serialization is pretty fresh so we need to opt into some experimental features to get the most
-// out of it
-fun org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension.userExperimentalSerialization() {
-    targets.all {
-        compilations.all {
-            kotlinOptions.freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
-        }
-    }
-    sourceSets.all {
-        languageSettings.apply {
-            useExperimentalAnnotation("kotlinx.serialization.UnstableDefault")
-            useExperimentalAnnotation("kotlinx.serialization.ImplicitReflectionSerializer")
-        }
-    }
-}
-
 kotlin {
     jvm()
     js {
@@ -50,8 +34,6 @@ kotlin {
             }
         }
     }
-
-    userExperimentalSerialization()
 
     sourceSets {
         // Common

@@ -8,7 +8,8 @@ import kotlinx.coroutines.asPromise
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
-internal actual fun serializer(): JsonSerializer = KotlinxSerializer(Json(JsonConfiguration(useArrayPolymorphism = true)))
+internal actual val jsonSerdes = Json(JsonConfiguration.Stable)
+internal actual val ktorSerializer: JsonSerializer = KotlinxSerializer(jsonSerdes)
 
 actual typealias AsyncResult<T> = com.opennms.cloud.maas.client.Promise<T>
 
