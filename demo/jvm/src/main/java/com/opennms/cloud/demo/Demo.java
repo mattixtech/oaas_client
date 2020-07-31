@@ -49,32 +49,20 @@ public class Demo {
                 .build();
 
         // Create an instance with name 'devjam'
-        String createdInstanceId = createInstance();
+        String createdInstanceId = client.create().onmsInstance(new OnmsInstanceRequestEntity("devjam")).join();
         listInstances("devjam");
 
         // Update the existing instance's name to 'kiwi'
-        updateInstance(createdInstanceId);
-        listInstances("kiwi");
-
-        // Delete the instance we created
-        deleteInstance(createdInstanceId);
-        listInstances("kiwi");
-    }
-
-    private static String createInstance() {
-        return client.create().onmsInstance(new OnmsInstanceRequestEntity("devjam")).join();
-    }
-
-    private static void updateInstance(String instanceId) {
-        client.update().onmsInstance(instanceId, new OnmsInstanceEntity.Builder()
-                .withId(instanceId)
+        client.update().onmsInstance(createdInstanceId, new OnmsInstanceEntity.Builder()
+                .withId(createdInstanceId)
                 .withName("kiwi")
                 .withOrganization(ORGANIZATION_NAME)
                 .build()).join();
-    }
+        listInstances("kiwi");
 
-    private static void deleteInstance(String instanceId) {
-        client.delete().onmsInstance(instanceId).join();
+        // Delete the instance we created
+        client.delete().onmsInstance(createdInstanceId).join();
+        listInstances("kiwi");
     }
 
     private static void listInstances(String prefix) {
