@@ -145,6 +145,10 @@ class AsyncMaasPortalClient(
                     if (options.searchField != null) parameter(SEARCH_COLUMN_KEY, options.searchField)
                 }
             }
+                    // Note:
+                    // kotlinx serialization for JS cannot currently deserialize to a generic object such as
+                    // PaginatedResponse<T>. I believe the appropriate workaround is to provide an explicit serdes for
+                    // that type, however I am shortcutting here to build the object by hand from a deserialized map.
                     .let { jsonMap ->
                         val totalRecords = requireNotNull(jsonMap[TOTAL_RECORDS_KEY])
                                 .primitive
@@ -157,7 +161,7 @@ class AsyncMaasPortalClient(
                     }
 
     private suspend inline fun <reified T : Entity> get(url: String, id: String): T =
-            client.get<T>("$url/$id") {
+            client.get("$url/$id") {
                 requestAuthProvider()
             }
 
@@ -168,13 +172,13 @@ class AsyncMaasPortalClient(
                 body = entity
             }
 
-    private suspend fun deleteById(url: String, id: String) =
-            client.delete<Unit>("$url/$id") {
+    private suspend fun deleteById(url: String, id: String): Unit =
+            client.delete("$url/$id") {
                 requestAuthProvider()
             }
 
-    private suspend fun updateById(url: String, id: String, entity: Entity) =
-            client.put<Unit>("$url/$id") {
+    private suspend fun updateById(url: String, id: String, entity: Entity): Unit =
+            client.put("$url/$id") {
                 requestAuthProvider()
                 contentType(ContentType.Application.Json)
                 body = entity
