@@ -26,11 +26,6 @@ const mpc = require('oaas_client/packages/oaas_client/kotlin/oaas_client').com.o
         console.log(result.pagedRecords)
     }
 
-    // Test getting a specific instance
-    // asyncClient.read.onmsInstance("5f7481e2-6dfe-4aa4-b7ae-6303e3fd4620").then((res) => {
-    //     console.log(res);
-    // });
-
     // Create an instance with name 'devjam'
     const instanceCreatedId = await asyncClient.create.onmsInstance(new mpc.model.OnmsInstanceRequestEntity("devjam"));
     await printInstances("devjam");

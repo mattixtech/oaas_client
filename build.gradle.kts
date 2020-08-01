@@ -65,7 +65,7 @@ kotlin {
         }
         val jvmTest by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
+                implementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
             }
         }
 

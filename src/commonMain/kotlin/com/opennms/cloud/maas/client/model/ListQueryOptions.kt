@@ -16,6 +16,11 @@ data class ListQueryOptions(
         val searchField: String? = null
 ) {
 
+    init {
+        if (searchField != null) requireNotNull(searchPrefix) { "A search prefix must be provided when search field is set" }
+        if (searchPrefix != null) requireNotNull(searchField) { "A search field must be provided when a search prefix is set" }
+    }
+    
     class Builder {
         private var orderByColumn: String? = null
         private var limit: Int? = null
@@ -43,8 +48,6 @@ data class ListQueryOptions(
         fun withSearchField(searchField: String) = apply { this.searchField = searchField }
 
         private fun validate() {
-            if (searchField != null) requireNotNull(searchPrefix) { "A search prefix must be provided when search field is set" }
-            if (searchPrefix != null) requireNotNull(searchField) { "A search field must be provided when a search prefix is set" }
         }
 
         fun build(): ListQueryOptions {

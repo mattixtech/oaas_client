@@ -7,14 +7,13 @@ import kotlin.js.JsName
 data class OnmsInstanceEntity(
         val organizationName: String,
         val name: String,
-        val managed: Boolean,
+        val managed: Boolean = false,
         val id: String
 ) : Entity {
 
     class Builder {
         private lateinit var organizationName: String
         private lateinit var name: String
-        private var managed = false
         private lateinit var id: String
 
         @JsName("withOrganization")
@@ -25,8 +24,6 @@ data class OnmsInstanceEntity(
 
         @JsName("withId")
         fun withId(id: String) = apply { this.id = id }
-
-        // Setter for managed field omitted for now
 
         private fun validate() {
             require(::organizationName.isInitialized) { "An organization is required" }
@@ -40,7 +37,6 @@ data class OnmsInstanceEntity(
             return OnmsInstanceEntity(
                     organizationName = organizationName,
                     name = name,
-                    managed = managed,
                     id = id
             )
         }
